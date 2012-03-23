@@ -9,7 +9,7 @@ def get_direction(self):
     try:
         return self.REQUEST['dir']
     except (KeyError, ValueError, TypeError):
-        return 'desc'
+        return 'asc'
 
 class SortingMiddleware(object):
     """

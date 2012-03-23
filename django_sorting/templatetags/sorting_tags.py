@@ -10,9 +10,9 @@ INVALID_FIELD_RAISES_404 = getattr(settings,
         'SORTING_INVALID_FIELD_RAISES_404' , False)
 
 sort_directions = {
-    'asc': {'icon':DEFAULT_SORT_UP, 'inverse': 'desc'}, 
-    'desc': {'icon':DEFAULT_SORT_DOWN, 'inverse': 'asc'}, 
-    '': {'icon':DEFAULT_SORT_DOWN, 'inverse': 'asc'}, 
+    'asc': {'icon':DEFAULT_SORT_DOWN, 'inverse': 'desc'},
+    'desc': {'icon':DEFAULT_SORT_UP, 'inverse': 'asc'},
+    '': {'icon':DEFAULT_SORT_DOWN, 'inverse': 'desc'},
 }
 
 def anchor(parser, token):
@@ -48,16 +48,21 @@ class SortAnchorNode(template.Node):
     def render(self, context):
         request = context['request']
         getvars = request.GET.copy()
-        if 'sort' in getvars:
-            sortby = getvars['sort']
-            del getvars['sort']
+        if context.has_key('default_sort_field') and not 'sort' in getvars:
+            sortby = context['default_sort_field']
+            sortdir = context.get('default_sort_dir', '')
         else:
-            sortby = ''
-        if 'dir' in getvars:
-            sortdir = getvars['dir']
-            del getvars['dir']
-        else:
-            sortdir = ''
+            if 'sort' in getvars:
+                sortby = getvars['sort']
+                del getvars['sort']
+            else:
+                sortby = ''
+            if 'dir' in getvars:
+                sortdir = getvars['dir']
+                del getvars['dir']
+            else:
+                sortdir = ''
+
         if sortby == self.field:
             getvars['dir'] = sort_directions[sortdir]['inverse']
             icon = sort_directions[sortdir]['icon']
@@ -68,7 +73,7 @@ class SortAnchorNode(template.Node):
         else:
             urlappend = ''
         if icon:
-            title = "%s %s" % (self.title, icon)
+            title = "%s%s" % (self.title, icon)
         else:
             title = self.title
 
